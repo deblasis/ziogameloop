@@ -439,3 +439,12 @@ test "GameLoop Config defaults" {
     try std.testing.expectEqual(@as(u32, 60), c.tick_rate);
     try std.testing.expectEqual(@as(u32, 5), c.max_catchup);
 }
+
+test "GameLoop totalFrames count increases" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    _ = loop.tick(0);
+    const f1 = loop.totalFrames();
+    _ = loop.tick(std.time.ns_per_s / 60);
+    const f2 = loop.totalFrames();
+    try std.testing.expect(f2 > f1);
+}
