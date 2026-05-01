@@ -353,3 +353,29 @@ test "GameLoop alpha after multiple ticks" {
     const r2 = loop.tick(tick_ns + tick_ns / 2);
     try std.testing.expect(r2.alpha >= 0 and r2.alpha <= 1);
 }
+
+test "GameLoop variable frame rate" {
+    var loop = GameLoop.init(.{ .tick_rate = 60, .max_catchup = 5 });
+    _ = loop.tick(0);
+
+    // Normal frame
+    const tick_ns = std.time.ns_per_s / 60;
+    const r1 = loop.tick(tick_ns);
+    try std.testing.expect(r1.updates >= 1);
+
+    // Another normal frame
+    const r2 = loop.tick(tick_ns * 2);
+    try std.testing.expect(r2.updates >= 1);
+    try std.testing.expect(r2.alpha >= 0 and r2.alpha <= 1);
+}
+
+test "GameLoop Config with all fields" {
+    const config = Config{
+        .tick_rate = 120,
+        .max_catchup = 10,
+        .target_fps = 60,
+    };
+    try std.testing.expectEqual(@as(u32, 120), config.tick_rate);
+    try std.testing.expectEqual(@as(u32, 10), config.max_catchup);
+    try std.testing.expectEqual(@as(u32, 60), config.target_fps);
+}
