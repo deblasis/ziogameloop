@@ -242,3 +242,19 @@ test "GameLoop config defaults" {
     try std.testing.expectEqual(@as(u32, 5), config.max_catchup);
     try std.testing.expectEqual(@as(u32, 0), config.target_fps);
 }
+
+test "GameLoop totalFrames increments" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    _ = loop.tick(0);
+    _ = loop.tick(std.time.ns_per_s / 60);
+    _ = loop.tick(std.time.ns_per_s / 60 * 2);
+    try std.testing.expect(loop.totalFrames() >= 2);
+}
+
+test "DeltaTracker sub-millisecond" {
+    var dt = DeltaTracker.init();
+    dt.update(0);
+    dt.update(1); // 1 nanosecond
+    try std.testing.expectEqual(@as(u64, 1), dt.dt_ns);
+    try std.testing.expect(dt.dt_sec > 0);
+}
