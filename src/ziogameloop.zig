@@ -258,3 +258,25 @@ test "DeltaTracker sub-millisecond" {
     try std.testing.expectEqual(@as(u64, 1), dt.dt_ns);
     try std.testing.expect(dt.dt_sec > 0);
 }
+
+test "GameLoop target fps 30" {
+    var loop = GameLoop.init(.{ .tick_rate = 60, .target_fps = 30 });
+    _ = loop.tick(0);
+    const result = loop.tick(std.time.ns_per_s / 120); // very small dt
+    try std.testing.expect(result.sleep_ns > 0);
+}
+
+test "GameLoop uncapped target fps" {
+    var loop = GameLoop.init(.{ .tick_rate = 60, .target_fps = 0 });
+    _ = loop.tick(0);
+    const result = loop.tick(std.time.ns_per_s / 120);
+    try std.testing.expectEqual(@as(u64, 0), result.sleep_ns);
+}
+
+test "GameLoop tick result fields" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    _ = loop.tick(0);
+    const result = loop.tick(std.time.ns_per_s / 60);
+    try std.testing.expect(result.updates >= 0);
+    try std.testing.expect(result.alpha >= 0 and result.alpha <= 1);
+}
