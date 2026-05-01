@@ -456,3 +456,17 @@ test "example: first 5 frames" {
     const r1 = loop.tick(std.time.ns_per_s / 60);
     try std.testing.expect(r1.updates >= 1);
 }
+
+test "GameLoop with 30fps tick rate" {
+    var loop = GameLoop.init(.{ .tick_rate = 30 });
+    _ = loop.tick(0);
+    const r = loop.tick(std.time.ns_per_s / 30);
+    try std.testing.expect(r.updates >= 1);
+}
+
+test "GameLoop with 120fps tick rate" {
+    var loop = GameLoop.init(.{ .tick_rate = 120 });
+    _ = loop.tick(0);
+    const r = loop.tick(std.time.ns_per_s / 120);
+    try std.testing.expect(r.updates >= 1);
+}
