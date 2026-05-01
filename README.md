@@ -40,6 +40,17 @@ zig build test          # Run 37 tests
 zig build run-example   # Run example
 ```
 
+## Example output
+
+```
+$ zig build run-example
+Frame 0: updates=0, alpha=0.00
+Frame 1: updates=1, alpha=0.00
+Frame 2: updates=1, alpha=0.00
+Frame 3: updates=1, alpha=0.00
+Frame 4: updates=1, alpha=0.00
+```
+
 ## API
 
 ### Config

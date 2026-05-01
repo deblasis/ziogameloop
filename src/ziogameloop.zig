@@ -448,3 +448,11 @@ test "GameLoop totalFrames count increases" {
     const f2 = loop.totalFrames();
     try std.testing.expect(f2 > f1);
 }
+
+test "example: first 5 frames" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    const r0 = loop.tick(0);
+    try std.testing.expectEqual(@as(u64, 0), r0.updates);
+    const r1 = loop.tick(std.time.ns_per_s / 60);
+    try std.testing.expect(r1.updates >= 1);
+}
