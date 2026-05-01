@@ -3,7 +3,7 @@ const zgl = @import("ziogameloop");
 
 pub fn main() !void {
     var loop = zgl.GameLoop.init(.{ .tick_rate = 60, .max_catchup = 5 });
-    
+
     // Simulate 5 frames
     var frame: u32 = 0;
     var ns: u64 = 0;

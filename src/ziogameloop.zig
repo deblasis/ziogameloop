@@ -383,9 +383,9 @@ test "GameLoop Config with all fields" {
 test "DeltaTracker multiple frames" {
     var dt = DeltaTracker.init();
     dt.update(0);
-    dt.update(16_000_000);  // 16ms
+    dt.update(16_000_000); // 16ms
     try std.testing.expectApproxEqAbs(@as(f32, 0.016), dt.dt_sec, 0.001);
-    dt.update(33_000_000);  // 17ms delta
+    dt.update(33_000_000); // 17ms delta
     try std.testing.expectApproxEqAbs(@as(f32, 0.017), dt.dt_sec, 0.001);
 }
 
