@@ -470,3 +470,9 @@ test "GameLoop with 120fps tick rate" {
     const r = loop.tick(std.time.ns_per_s / 120);
     try std.testing.expect(r.updates >= 1);
 }
+
+test "frame budget at 60fps" {
+    const tick_ns = std.time.ns_per_s / 60;
+    try std.testing.expect(tick_ns > 15_000_000); // >15ms per frame
+    try std.testing.expect(tick_ns < 17_000_000); // <17ms per frame
+}
