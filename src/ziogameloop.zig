@@ -427,3 +427,15 @@ test "DeltaTracker dt_sec is always non-negative" {
     dt.update(200_000_000);
     try std.testing.expect(dt.dt_sec >= 0);
 }
+
+test "GameLoop zero elapsed time" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    const r = loop.tick(0);
+    try std.testing.expectEqual(@as(u64, 0), r.updates);
+}
+
+test "GameLoop Config defaults" {
+    const c = Config{ .tick_rate = 60 };
+    try std.testing.expectEqual(@as(u32, 60), c.tick_rate);
+    try std.testing.expectEqual(@as(u32, 5), c.max_catchup);
+}
