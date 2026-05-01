@@ -303,3 +303,35 @@ test "DeltaTracker large dt" {
     dt.update(std.time.ns_per_s);
     try std.testing.expectApproxEqAbs(@as(f32, 1.0), dt.dt_sec, 0.001);
 }
+
+test "GameLoop simulates 60fps game loop" {
+    var loop = GameLoop.init(.{ .tick_rate = 60, .max_catchup = 3 });
+    var total_updates: u64 = 0;
+    var ns: u64 = 0;
+
+    // Simulate 10 frames at 60fps
+    for (0..10) |_| {
+        ns += std.time.ns_per_s / 60;
+        const result = loop.tick(ns);
+        total_updates += result.updates;
+    }
+
+    // Should have roughly 10 updates
+    try std.testing.expect(total_updates >= 8);
+    try std.testing.expect(total_updates <= 12);
+}
+
+test "GameLoop total stats" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    _ = loop.tick(0);
+    _ = loop.tick(std.time.ns_per_s);
+    try std.testing.expect(loop.totalFrames() >= 1);
+    try std.testing.expect(loop.totalUpdates() >= 1);
+}
+
+test "DeltaTracker sub-second dt" {
+    var dt = DeltaTracker.init();
+    dt.update(0);
+    dt.update(500_000_000); // 0.5 seconds
+    try std.testing.expectApproxEqAbs(@as(f32, 0.5), dt.dt_sec, 0.001);
+}
