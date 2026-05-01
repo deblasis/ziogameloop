@@ -379,3 +379,29 @@ test "GameLoop Config with all fields" {
     try std.testing.expectEqual(@as(u32, 10), config.max_catchup);
     try std.testing.expectEqual(@as(u32, 60), config.target_fps);
 }
+
+test "DeltaTracker multiple frames" {
+    var dt = DeltaTracker.init();
+    dt.update(0);
+    dt.update(16_000_000);  // 16ms
+    try std.testing.expectApproxEqAbs(@as(f32, 0.016), dt.dt_sec, 0.001);
+    dt.update(33_000_000);  // 17ms delta
+    try std.testing.expectApproxEqAbs(@as(f32, 0.017), dt.dt_sec, 0.001);
+}
+
+test "GameLoop simulates 10 fixed ticks" {
+    var loop = GameLoop.init(.{ .tick_rate = 60, .max_catchup = 3 });
+    var total_updates: u64 = 0;
+    var ns: u64 = 0;
+
+    // Simulate 10 frames at 60fps
+    for (0..10) |_| {
+        ns += std.time.ns_per_s / 60;
+        const result = loop.tick(ns);
+        total_updates += result.updates;
+    }
+
+    // Should have roughly 10 updates
+    try std.testing.expect(total_updates >= 8);
+    try std.testing.expect(total_updates <= 12);
+}
