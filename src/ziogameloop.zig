@@ -335,3 +335,21 @@ test "DeltaTracker sub-second dt" {
     dt.update(500_000_000); // 0.5 seconds
     try std.testing.expectApproxEqAbs(@as(f32, 0.5), dt.dt_sec, 0.001);
 }
+
+test "GameLoop catchup after long pause" {
+    var loop = GameLoop.init(.{ .tick_rate = 60, .max_catchup = 3 });
+    _ = loop.tick(0);
+    // Jump ahead 1 second
+    const result = loop.tick(std.time.ns_per_s);
+    try std.testing.expect(result.updates >= 1);
+    try std.testing.expect(result.updates <= 3); // capped
+}
+
+test "GameLoop alpha after multiple ticks" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    _ = loop.tick(0);
+    const tick_ns = std.time.ns_per_s / 60;
+    _ = loop.tick(tick_ns);
+    const r2 = loop.tick(tick_ns + tick_ns / 2);
+    try std.testing.expect(r2.alpha >= 0 and r2.alpha <= 1);
+}
