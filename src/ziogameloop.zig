@@ -205,3 +205,40 @@ test "DeltaTracker first update has zero dt" {
     dt.update(1000000);
     try std.testing.expectEqual(@as(u64, 0), dt.dt_ns);
 }
+
+test "GameLoop tick_dt_ns calculation" {
+    const loop = GameLoop.init(.{ .tick_rate = 30 });
+    try std.testing.expectEqual(@as(u64, std.time.ns_per_s / 30), loop.tick_dt_ns);
+}
+
+test "GameLoop multiple updates in one big jump" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    _ = loop.tick(0);
+    // Jump ahead 5 ticks worth of time
+    const result = loop.tick(std.time.ns_per_s / 60 * 5);
+    try std.testing.expect(result.updates >= 1);
+    try std.testing.expect(result.updates <= 5); // capped by max_catchup
+}
+
+test "GameLoop alpha is 0 after exact tick" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    _ = loop.tick(0);
+    const result = loop.tick(std.time.ns_per_s / 60);
+    try std.testing.expect(result.alpha < 0.01);
+}
+
+test "DeltaTracker multiple updates" {
+    var dt = DeltaTracker.init();
+    dt.update(0);
+    dt.update(500_000); // 0.5ms
+    dt.update(1_500_000); // 1ms later
+    try std.testing.expectEqual(@as(u64, 1_000_000), dt.dt_ns);
+    try std.testing.expectApproxEqAbs(@as(f32, 0.001), dt.dt_sec, 0.0001);
+}
+
+test "GameLoop config defaults" {
+    const config = Config{};
+    try std.testing.expectEqual(@as(u32, 60), config.tick_rate);
+    try std.testing.expectEqual(@as(u32, 5), config.max_catchup);
+    try std.testing.expectEqual(@as(u32, 0), config.target_fps);
+}
