@@ -405,3 +405,25 @@ test "GameLoop simulates 10 fixed ticks" {
     try std.testing.expect(total_updates >= 8);
     try std.testing.expect(total_updates <= 12);
 }
+
+test "GameLoop alpha is always in [0,1]" {
+    var loop = GameLoop.init(.{ .tick_rate = 60, .max_catchup = 5 });
+    _ = loop.tick(0);
+    const tick_ns = std.time.ns_per_s / 60;
+
+    var ns: u64 = tick_ns;
+    while (ns < tick_ns * 20) : (ns += tick_ns * 7 / 10) {
+        const r = loop.tick(ns);
+        try std.testing.expect(r.alpha >= 0);
+        try std.testing.expect(r.alpha <= 1);
+    }
+}
+
+test "DeltaTracker dt_sec is always non-negative" {
+    var dt = DeltaTracker.init();
+    dt.update(0);
+    dt.update(100_000_000);
+    try std.testing.expect(dt.dt_sec >= 0);
+    dt.update(200_000_000);
+    try std.testing.expect(dt.dt_sec >= 0);
+}
