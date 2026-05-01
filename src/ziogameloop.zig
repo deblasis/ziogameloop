@@ -280,3 +280,26 @@ test "GameLoop tick result fields" {
     try std.testing.expect(result.updates >= 0);
     try std.testing.expect(result.alpha >= 0 and result.alpha <= 1);
 }
+
+test "GameLoop very high tick rate" {
+    var loop = GameLoop.init(.{ .tick_rate = 1000 });
+    _ = loop.tick(0);
+    // One ms should trigger one update
+    const result = loop.tick(std.time.ns_per_ms);
+    try std.testing.expect(result.updates >= 1);
+}
+
+test "GameLoop TickResult fields complete" {
+    var loop = GameLoop.init(.{ .tick_rate = 60 });
+    const result = loop.tick(0);
+    try std.testing.expectEqual(@as(u32, 0), result.updates);
+    try std.testing.expectEqual(@as(f32, 0), result.alpha);
+    try std.testing.expectEqual(@as(u64, 0), result.sleep_ns);
+}
+
+test "DeltaTracker large dt" {
+    var dt = DeltaTracker.init();
+    dt.update(0);
+    dt.update(std.time.ns_per_s);
+    try std.testing.expectApproxEqAbs(@as(f32, 1.0), dt.dt_sec, 0.001);
+}
